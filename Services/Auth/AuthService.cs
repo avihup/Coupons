@@ -56,10 +56,14 @@ namespace TestCase.Services.Auth
             var claims = new List<Claim>
             {
                 new(ClaimTypes.Name, user.UserName),
-                new("userId", user.Id.ToString()),
-                new("clientId", client?.Id.ToString()),
-                new("clientName", client?.Name)
+                new("userId", user.Id.ToString())
             };
+
+            if (client != null)
+            {
+                claims.Add(new("clientId", client.Id.ToString()));
+                claims.Add(new("clientName", client.Name));
+            }
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

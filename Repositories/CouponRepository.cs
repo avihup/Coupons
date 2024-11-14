@@ -23,19 +23,23 @@ namespace TestCase.Repositories
 
         public async Task<CouponDto> GetByIdAsync(Guid? clientId, Guid id)
         {
-            var filter = Builders<CouponDto>.Filter.And(
-                Builders<CouponDto>.Filter.Eq(c => c.Id, id),
-                Builders<CouponDto>.Filter.Eq(c => c.ClientId, clientId)
-            );
+            var idFilter = Builders<CouponDto>.Filter.Eq(c => c.Id, id);
+            var filter = clientId.HasValue
+                ? Builders<CouponDto>.Filter.And(
+                    idFilter,
+                    Builders<CouponDto>.Filter.Eq(c => c.ClientId, clientId.Value))
+                : idFilter;
 
             return await _couponsCollection.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<CouponDto>> GetAllAsync(Guid? clientId)
         {
-            var filter = Builders<CouponDto>.Filter.And(
-                Builders<CouponDto>.Filter.Eq(c => c.ClientId, clientId)
-            );
+
+            var filter = clientId.HasValue
+                ? Builders<CouponDto>.Filter.Eq(c => c.ClientId, clientId.Value)
+                : Builders<CouponDto>.Filter.Empty;
+
             return await _couponsCollection.Find(filter).ToListAsync();
         }
 

@@ -22,6 +22,18 @@ namespace TestCase.Services.DataInitializer
             var usersCollection = database.GetCollection<UserDto>("Users");
 
             // Check if initialization is needed
+            if (await usersCollection.CountDocumentsAsync(x=> !x.ClientId.HasValue) == 0)
+            {
+                var admin = new UserDto
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = "systemadmin",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("systemadmin123"),
+                    Created = DateTime.UtcNow
+                };
+                await usersCollection.InsertOneAsync(admin);
+            }
+
             if (await clientsCollection.CountDocumentsAsync(FilterDefinition<ClientDto>.Empty) > 0)
             {
                 _logger.LogInformation("Database already initialized");
