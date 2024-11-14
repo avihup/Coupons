@@ -1,59 +1,52 @@
 ﻿using MongoDB.Driver;
 using TestCase.Exceptions;
-using TestCase.Models;
+using TestCase.Interfaces.Repositories;
+using TestCase.Models.Database;
 
 namespace TestCase.Repositories
 {
     public class CouponRepository : ICouponRepository
     {
-        private readonly IMongoCollection<CouponDb> _couponsCollection;
+        private readonly IMongoCollection<CouponDto> _couponsCollection;
 
         public CouponRepository(IMongoClient mongoClient)
         {
             var database = mongoClient.GetDatabase("CouponsDb");
-            _couponsCollection = database.GetCollection<CouponDb>("Coupons");
+            _couponsCollection = database.GetCollection<CouponDto>("Coupons");
         }
 
-        public async Task<CouponDb> CreateAsync(CouponDb coupon)
+        public async Task<CouponDto> CreateAsync(CouponDto coupon)
         {
             await _couponsCollection.InsertOneAsync(coupon);
             return coupon;
         }
 
-        public async Task<CouponDb> GetByIdAsync(string id)
+        public async Task<CouponDto> GetByIdAsync(Guid? clientId, Guid id)
         {
-            return await _couponsCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
-        }
-
-        public async Task<IEnumerable<CouponDb>> GetAllAsync()
-        {
-            return await _couponsCollection.Find(_ => true).ToListAsync();
-        }
-
-        public async Task UpdateStatusAsync(string id, CouponStatus oldStatus, CouponStatus newStatus)
-        {
-            var filter = Builders<CouponDb>.Filter.And(
-                Builders<CouponDb>.Filter.Eq(c => c.Id, id),
-                Builders<CouponDb>.Filter.Eq(c => c.Status, oldStatus)
+            var filter = Builders<CouponDto>.Filter.And(
+                Builders<CouponDto>.Filter.Eq(c => c.Id, id),
+                Builders<CouponDto>.Filter.Eq(c => c.ClientId, clientId)
             );
 
-            var update = Builders<CouponDb>.Update
-                .Set(c => c.Status, newStatus)
-                .Set(c => c.Updated, DateTime.UtcNow);
+            return await _couponsCollection.Find(filter).FirstOrDefaultAsync();
+        }
 
-            var result = await _couponsCollection.UpdateOneAsync(filter, update);
+        public async Task<IEnumerable<CouponDto>> GetAllAsync(Guid? clientId)
+        {
+            var filter = Builders<CouponDto>.Filter.And(
+                Builders<CouponDto>.Filter.Eq(c => c.ClientId, clientId)
+            );
+            return await _couponsCollection.Find(filter).ToListAsync();
+        }
 
-            if (result.ModifiedCount == 0)
-            {
-                var coupon = await GetByIdAsync(id);
-                if (coupon == null)
-                {
-                    throw new CouponValidationException($"Coupon with ID {id} not found");
-                }
-                throw new CouponValidationException(
-                    $"Cannot cancel coupon. Current status is {coupon.Status}. Only active coupons can be cancelled."
-                );
-            }
+        public async Task<bool> UpdateAsync(Guid id, UpdateDefinition<CouponDto> update)
+        {
+            var result = await _couponsCollection.UpdateOneAsync(
+                c => c.Id == id,
+                update
+            );
+
+            return result.ModifiedCount > 0;
         }
     }
 }

@@ -1,13 +1,11 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
+﻿using TestCase.Models.Database;
 
-namespace TestCase.Models
+namespace TestCase.Models.ViewModels
 {
-    public class CouponDb
+    public class CouponViewModel
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public Guid Id { get; set; }
+        public Guid ClientId { get; set; }
         public string Name { get; set; }
         public DateTime Created { get; set; }
         public DateTime ExpiryDate { get; set; }
@@ -15,7 +13,7 @@ namespace TestCase.Models
         public decimal Amount { get; set; }
         public CouponStatus Status { get; set; }
         public int TotalUnits { get; set; }
-        
         public DateTime? Updated { get; set; }
     }
+
 }

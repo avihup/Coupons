@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using MongoDB.Driver;
+using System.Data;
 using TestCase.Exceptions;
-using TestCase.Models;
-using TestCase.Repositories;
+using TestCase.Interfaces.Repositories;
+using TestCase.Interfaces.Services;
+using TestCase.Models.Database;
+using TestCase.Models.ViewModels;
 using TestCase.Services.BackgroundServices;
-using TestCase.ViewModels;
 
 namespace TestCase.Services
 {
@@ -14,61 +16,68 @@ namespace TestCase.Services
         private readonly ICouponUnitGenerationService _couponUnitGenerationService;
         private readonly ICouponUnitCancelService _couponUnitCancelService;
         private readonly IMapper _mapper;
-        private readonly ILogger<CouponService> _logger;
         public CouponService(
             ICouponRepository couponRepository,
             ICouponUnitGenerationService couponUnitGenerationService,
             ICouponUnitCancelService couponUnitCancelService,
-            IMapper mapper,
-            ILogger<CouponService> logger)
+            IMapper mapper)
         {
             _couponRepository = couponRepository;
             _couponUnitGenerationService = couponUnitGenerationService;
             _couponUnitCancelService = couponUnitCancelService;
             _mapper = mapper;
-            _logger = logger;
         }
 
-        public async Task<CouponResponse> CreateAsync(CreateCouponRequest request)
+        public async Task<CouponViewModel> CreateAsync(CreateCouponRequest request)
         {
-            var couponDb = _mapper.Map<CouponDb>(request);
+            var couponDb = _mapper.Map<CouponDto>(request);
             await _couponRepository.CreateAsync(couponDb);
 
             await _couponUnitGenerationService.QueueCouponUnitGeneration(couponDb.Id, couponDb.TotalUnits);
 
-            return _mapper.Map<CouponResponse>(couponDb);
+            return _mapper.Map<CouponViewModel>(couponDb);
         }
 
-        public async Task<CouponResponse> GetByIdAsync(string id)
+        public async Task<CouponViewModel> GetByIdAsync(Guid? clientId, Guid id)
         {
-            var couponDb = await _couponRepository.GetByIdAsync(id);
-            return _mapper.Map<CouponResponse>(couponDb);
+            var couponDb = await _couponRepository.GetByIdAsync(clientId, id);
+            return _mapper.Map<CouponViewModel>(couponDb);
         }
 
-        public async Task<IEnumerable<CouponResponse>> GetAllAsync()
+        public async Task<IEnumerable<CouponViewModel>> GetAllAsync(Guid? clientId)
         {
-            var couponsDb = await _couponRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<CouponResponse>>(couponsDb);
+            var couponsDb = await _couponRepository.GetAllAsync(clientId);
+            return _mapper.Map<IEnumerable<CouponViewModel>>(couponsDb);
         }
 
-        public async Task CancelAsync(string id)
+        public async Task CancelAsync(Guid? clientId, Guid id)
         {
-            try
+            // Get and validate the coupon
+            var coupon = await _couponRepository.GetByIdAsync(clientId, id)
+                ?? throw new ValidationException($"Coupon with ID {id} not found");
+
+            if (coupon.Status != CouponStatus.Active)
             {
-                await _couponRepository.UpdateStatusAsync(id, CouponStatus.Active, CouponStatus.Cancelled);
-                await _couponUnitCancelService.QueueCouponUnitCancellation(id);
-                _logger.LogInformation("Coupon {CouponId} cancelled successfully", id);
+                throw new ValidationException(
+                    $"Cannot cancel coupon. Current status is {coupon.Status}. Only active coupons can be cancelled."
+                );
             }
-            catch (CouponValidationException ex)
+
+            // Build update definition
+            var update = Builders<CouponDto>.Update
+                .Set(c => c.Status, CouponStatus.Cancelled)
+                .Set(c => c.Updated, DateTime.UtcNow);
+
+            // Perform the update
+            var updated = await _couponRepository.UpdateAsync(id, update);
+
+            if (!updated)
             {
-                _logger.LogWarning(ex, "Validation error while cancelling coupon {CouponId}", id);
-                throw;
+                throw new ConcurrencyException($"Failed to cancel coupon {id}. Please try again.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error cancelling coupon {CouponId}", id);
-                throw;
-            }
+
+            await _couponUnitCancelService.QueueCouponUnitCancellation(id);
+
         }
     }
 }

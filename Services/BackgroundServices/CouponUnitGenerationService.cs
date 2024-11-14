@@ -1,31 +1,31 @@
 ﻿using MongoDB.Driver;
 using System.Threading.Channels;
-using TestCase.Models;
+using TestCase.Models.Database;
 
 namespace TestCase.Services.BackgroundServices
 {
     public interface ICouponUnitGenerationService
     {
-        Task QueueCouponUnitGeneration(string couponId, int units);
+        Task QueueCouponUnitGeneration(Guid couponId, int units);
     }
 
     public class CouponUnitGenerationService : BackgroundService, ICouponUnitGenerationService
     {
-        private readonly IMongoCollection<CouponUnitDb> _couponUnitsCollection;
+        private readonly IMongoCollection<CouponUnitDto> _couponUnitsCollection;
         private readonly ILogger<CouponUnitGenerationService> _logger;
-        private readonly Channel<(string CouponId, int Units)> _channel;
+        private readonly Channel<(Guid CouponId, int Units)> _channel;
 
         public CouponUnitGenerationService(
             IMongoClient mongoClient,
             ILogger<CouponUnitGenerationService> logger)
         {
             var database = mongoClient.GetDatabase("CouponsDb");
-            _couponUnitsCollection = database.GetCollection<CouponUnitDb>("CouponUnits");
+            _couponUnitsCollection = database.GetCollection<CouponUnitDto>("CouponUnits");
             _logger = logger;
-            _channel = Channel.CreateUnbounded<(string, int)>();
+            _channel = Channel.CreateUnbounded<(Guid, int)>();
         }
 
-        public async Task QueueCouponUnitGeneration(string couponId, int units)
+        public async Task QueueCouponUnitGeneration(Guid couponId, int units)
         {
             await _channel.Writer.WriteAsync((couponId, units));
         }
@@ -37,11 +37,11 @@ namespace TestCase.Services.BackgroundServices
                 try
                 {
                     var (couponId, units) = await _channel.Reader.ReadAsync(stoppingToken);
-                    var couponUnits = new List<CouponUnitDb>();
+                    var couponUnits = new List<CouponUnitDto>();
 
                     for (int i = 0; i < units; i++)
                     {
-                        couponUnits.Add(new CouponUnitDb
+                        couponUnits.Add(new CouponUnitDto
                         {
                             CouponId = couponId,
                             Status = CouponStatus.Active,

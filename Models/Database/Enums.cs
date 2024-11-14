@@ -1,4 +1,4 @@
-﻿namespace TestCase.Models
+﻿namespace TestCase.Models.Database
 {
     public enum CouponType
     {

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TestCase.Models;
+using TestCase.Models.Database;
 using TestCase.Validation;
 
-namespace TestCase.ViewModels
+namespace TestCase.Models.ViewModels
 {
     public class CreateCouponRequest
     {
@@ -24,6 +24,8 @@ namespace TestCase.ViewModels
         [Required]
         [Range(1, 100000)]
         public int TotalUnits { get; set; }
+
+        public Guid? ClientId { get; set; }
 
     }
 }

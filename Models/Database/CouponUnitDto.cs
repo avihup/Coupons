@@ -1,14 +1,16 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
-namespace TestCase.Models
+namespace TestCase.Models.Database
 {
-    public class CouponUnitDb
+    public class CouponUnitDto
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
-        public string CouponId { get; set; }
+        [BsonRepresentation(BsonType.String)]
+        public Guid Id { get; set; }
+
+        [BsonRepresentation(BsonType.String)]
+        public Guid CouponId { get; set; }
 
         public Guid? OrderId { get; set; }
         public CouponStatus Status { get; set; }

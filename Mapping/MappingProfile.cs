@@ -1,7 +1,7 @@
 ﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-using TestCase.Models;
-using TestCase.ViewModels;
 using AutoMapper;
+using TestCase.Models.Database;
+using TestCase.Models.ViewModels;
 
 namespace TestCase.Mapping
 {
@@ -9,11 +9,11 @@ namespace TestCase.Mapping
     {
         public MappingProfile()
         {
-            CreateMap<CreateCouponRequest, CouponDb>()
+            CreateMap<CreateCouponRequest, CouponDto>()
                 .ForMember(dest => dest.Created, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => CouponStatus.Active));
 
-            CreateMap<CouponDb, CouponResponse>();
+            CreateMap<CouponDto, CouponViewModel>();
         }
     }
 }

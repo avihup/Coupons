@@ -1,31 +1,31 @@
 ﻿using MongoDB.Driver;
 using System.Threading.Channels;
-using TestCase.Models;
+using TestCase.Models.Database;
 
 namespace TestCase.Services.BackgroundServices
 {
     public interface ICouponUnitCancelService
     {
-        Task QueueCouponUnitCancellation(string couponId);
+        Task QueueCouponUnitCancellation(Guid couponId);
     }
 
     public class CouponUnitCancelService : BackgroundService, ICouponUnitCancelService
     {
-        private readonly IMongoCollection<CouponUnitDb> _couponUnitsCollection;
+        private readonly IMongoCollection<CouponUnitDto> _couponUnitsCollection;
         private readonly ILogger<CouponUnitCancelService> _logger;
-        private readonly Channel<string> _channel;
+        private readonly Channel<Guid> _channel;
 
         public CouponUnitCancelService(
             IMongoClient mongoClient,
             ILogger<CouponUnitCancelService> logger)
         {
             var database = mongoClient.GetDatabase("CouponsDb");
-            _couponUnitsCollection = database.GetCollection<CouponUnitDb>("CouponUnits");
+            _couponUnitsCollection = database.GetCollection<CouponUnitDto>("CouponUnits");
             _logger = logger;
-            _channel = Channel.CreateUnbounded<string>();
+            _channel = Channel.CreateUnbounded<Guid>();
         }
 
-        public async Task QueueCouponUnitCancellation(string couponId)
+        public async Task QueueCouponUnitCancellation(Guid couponId)
         {
             await _channel.Writer.WriteAsync(couponId);
         }
@@ -39,13 +39,13 @@ namespace TestCase.Services.BackgroundServices
                 {
 
                     // Define the filter for active coupon units with the specified couponId
-                    var filter = Builders<CouponUnitDb>.Filter.And(
-                        Builders<CouponUnitDb>.Filter.Eq(u => u.CouponId, couponId),
-                        Builders<CouponUnitDb>.Filter.Eq(u => u.Status, CouponStatus.Active)
+                    var filter = Builders<CouponUnitDto>.Filter.And(
+                        Builders<CouponUnitDto>.Filter.Eq(u => u.CouponId, couponId),
+                        Builders<CouponUnitDto>.Filter.Eq(u => u.Status, CouponStatus.Active)
                     );
 
                     // Define the update to set status to cancelled and update timestamp
-                    var update = Builders<CouponUnitDb>.Update
+                    var update = Builders<CouponUnitDto>.Update
                         .Set(u => u.Status, CouponStatus.Cancelled)
                         .Set(u => u.Updated, DateTime.UtcNow);
 
