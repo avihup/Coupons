@@ -20,8 +20,10 @@ namespace TestCase.Services.DataInitializer
             var database = _mongoClient.GetDatabase("CouponsDb");
             var clientsCollection = database.GetCollection<ClientDto>("Clients");
             var usersCollection = database.GetCollection<UserDto>("Users");
+            var machinesCollection = database.GetCollection<MachineDto>("Machines");
+            var kioskCollection = database.GetCollection<KioskDto>("Kiosks");
 
-            // Check if initialization is needed
+            //Add system admin
             if (await usersCollection.CountDocumentsAsync(x=> !x.ClientId.HasValue) == 0)
             {
                 var admin = new UserDto
@@ -34,6 +36,9 @@ namespace TestCase.Services.DataInitializer
                 await usersCollection.InsertOneAsync(admin);
             }
 
+
+
+            // Check if initialization is needed
             if (await clientsCollection.CountDocumentsAsync(FilterDefinition<ClientDto>.Empty) > 0)
             {
                 _logger.LogInformation("Database already initialized");
@@ -59,6 +64,28 @@ namespace TestCase.Services.DataInitializer
                 Created = DateTime.UtcNow
             };
             await usersCollection.InsertOneAsync(user);
+
+
+            // add initial machine
+            var machine = new MachineDto
+            {
+                Id = Guid.NewGuid(),
+                ClientId = client.Id,
+                Name = "test machine",
+                AccessToken = Guid.NewGuid().ToString(),
+                Created = DateTime.UtcNow
+            };
+            await machinesCollection.InsertOneAsync(machine);
+            // add initial kiosk
+            var kiosk = new KioskDto
+            {
+                Id = Guid.NewGuid(),
+                ClientId = client.Id,
+                Name = "test kiosk",
+                AccessToken = Guid.NewGuid().ToString(),
+                Created = DateTime.UtcNow
+            };
+            await kioskCollection.InsertOneAsync(kiosk);
 
             _logger.LogInformation("Database initialized with default client and admin user");
         }

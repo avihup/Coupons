@@ -11,6 +11,7 @@ using TestCase.Interfaces.DataInitializer;
 using TestCase.Interfaces.Repositories;
 using TestCase.Interfaces.Services;
 using TestCase.Mapping;
+using TestCase.Middlewares;
 using TestCase.Models.Auth;
 using TestCase.Repositories;
 using TestCase.Services;
@@ -82,7 +83,10 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 builder.Services.AddScoped<IUsersRespository, UsersRespository>();
 builder.Services.AddScoped<IClientsRepository, ClientsRepository>();
+builder.Services.AddScoped<IMachinesRepository, MachinesRepository>();
+builder.Services.AddScoped<IKiosksRespository, KiosksRespository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBindingService, BindingService>();
 builder.Services.AddScoped<IDataInitializer, DataInitializer>();
 
 // Register services
@@ -119,6 +123,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
+app.UseApiAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

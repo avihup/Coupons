@@ -11,7 +11,7 @@ namespace TestCase.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class CouponsController : AppBaseController
     {
         private readonly ICouponService _couponService;
