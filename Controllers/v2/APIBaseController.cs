@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using TestCase.Models.Auth;
 
-namespace TestCase.Controllers
+namespace TestCase.Controllers.v2
 {
     public class APIBaseController : ControllerBase
     {
@@ -13,11 +13,11 @@ namespace TestCase.Controllers
         {
             get
             {
-                if (!this.User.Identity.IsAuthenticated)
+                if (!User.Identity.IsAuthenticated)
                     return null;
                 string clientId = User.Claims.FirstOrDefault(c => c.Type == "clientId")?.Value;
                 string deviceId = User.Claims.FirstOrDefault(c => c.Type == "deviceId")?.Value;
-                this._device = new Device()
+                _device = new Device()
                 {
                     Id = Guid.Parse(deviceId),
                     DeviceType = User.Claims.FirstOrDefault(c => c.Type == "deviceType")?.Value,
@@ -25,7 +25,7 @@ namespace TestCase.Controllers
                     Name = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
                     ClientName = User.Claims.FirstOrDefault(c => c.Type == "clientName")?.Value
                 };
-                return this._device;
+                return _device;
             }
         }
     }

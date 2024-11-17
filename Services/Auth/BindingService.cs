@@ -47,7 +47,7 @@ namespace TestCase.Services.Auth
                 return new BindingResponse
                 {
                     Token = token,
-                    Name = kiosk.Name,
+                    Name = machine.Name,
                     ClientId = client.Id,
                     ClientName = client.Name
                 };

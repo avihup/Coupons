@@ -2,7 +2,7 @@
 using TestCase.Interfaces.Auth;
 using TestCase.Models.Auth;
 
-namespace TestCase.Controllers
+namespace TestCase.Controllers.v2
 {
     [ApiController]
     [Route("api/v2/[controller]")]

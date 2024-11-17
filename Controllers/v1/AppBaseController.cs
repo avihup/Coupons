@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using TestCase.Models.Auth;
 
-namespace TestCase.Controllers
+namespace TestCase.Controllers.v1
 {
     public class AppBaseController : ControllerBase
     {
@@ -13,18 +13,18 @@ namespace TestCase.Controllers
         {
             get
             {
-                if (!this.User.Identity.IsAuthenticated)
+                if (!User.Identity.IsAuthenticated)
                     return null;
                 string clientId = User.Claims.FirstOrDefault(c => c.Type == "clientId")?.Value;
                 string userId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-                this._user = new User()
+                _user = new User()
                 {
                     UserId = Guid.Parse(userId),
                     ClientId = !string.IsNullOrEmpty(clientId) ? Guid.Parse(clientId) : null,
                     UserName = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
                     ClientName = User.Claims.FirstOrDefault(c => c.Type == "clientName")?.Value
                 };
-                return this._user;
+                return _user;
             }
         }
     }

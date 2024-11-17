@@ -7,7 +7,7 @@ using TestCase.Models;
 using TestCase.Models.ViewModels;
 using TestCase.Services;
 
-namespace TestCase.Controllers
+namespace TestCase.Controllers.v2
 {
     [Authorize]
     [ApiController]

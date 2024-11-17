@@ -7,7 +7,7 @@ using TestCase.Models;
 using TestCase.Models.ViewModels;
 using TestCase.Services;
 
-namespace TestCase.Controllers
+namespace TestCase.Controllers.v1
 {
     [Authorize]
     [ApiController]
@@ -30,12 +30,12 @@ namespace TestCase.Controllers
         public async Task<ActionResult<CouponViewModel>> Create([FromBody] CreateCouponRequest request)
         {
             request.ClientId ??= AppUser.ClientId;
-            
+
             if (!request.ClientId.HasValue)
             {
                 return BadRequest(new { message = "Missing Client Id" });
             }
-            
+
             var result = await _couponService.CreateAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
