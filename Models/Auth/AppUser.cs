@@ -1,6 +1,6 @@
 ﻿namespace TestCase.Models.Auth
 {
-    public class User
+    public class AppUser
     {
         public Guid UserId { get; set; }
         public string UserName { get; set; }

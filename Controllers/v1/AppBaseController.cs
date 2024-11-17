@@ -7,9 +7,9 @@ namespace TestCase.Controllers.v1
     public class AppBaseController : ControllerBase
     {
 
-        private User _user;
+        private AppUser _user;
 
-        public User AppUser
+        public AppUser AppUser
         {
             get
             {
@@ -17,7 +17,7 @@ namespace TestCase.Controllers.v1
                     return null;
                 string clientId = User.Claims.FirstOrDefault(c => c.Type == "clientId")?.Value;
                 string userId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-                _user = new User()
+                _user = new AppUser()
                 {
                     UserId = Guid.Parse(userId),
                     ClientId = !string.IsNullOrEmpty(clientId) ? Guid.Parse(clientId) : null,
