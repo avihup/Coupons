@@ -101,7 +101,7 @@ namespace TestCase.Controllers.v1
         }
 
         /// <summary>
-        /// Retrieves all coupons for the current client
+        /// Retrieves all coupons
         /// </summary>
         /// <returns>List of coupons</returns>
         [HttpGet]

@@ -89,6 +89,7 @@ builder.Services.AddScoped<IClientsRepository, ClientsRepository>();
 builder.Services.AddScoped<IMachinesRepository, MachinesRepository>();
 builder.Services.AddScoped<IKiosksRespository, KiosksRespository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBindingService, BindingService>();
 builder.Services.AddScoped<IDataInitializer, DataInitializer>();
 

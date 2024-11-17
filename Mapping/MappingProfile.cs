@@ -14,6 +14,8 @@ namespace TestCase.Mapping
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => CouponStatus.Active));
 
             CreateMap<CouponDto, CouponViewModel>();
+
+            CreateMap<UserDto, UserViewModel>();
         }
     }
 }
