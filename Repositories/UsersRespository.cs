@@ -12,6 +12,23 @@ namespace TestCase.Repositories
         {
             var database = mongoClient.GetDatabase("CouponsDb");
             _usersCollection = database.GetCollection<UserDto>("Users");
+            ConfigureCollection().GetAwaiter().GetResult();
+        }
+
+        private async Task ConfigureCollection()
+        {
+            // Create compound unique index for Name + ClientId
+            var indexKeysDefinition = Builders<UserDto>.IndexKeys
+                .Ascending(x => x.UserName);
+
+            var indexOptions = new CreateIndexOptions
+            {
+                Unique = true,
+                Name = "UserName_Unique"
+            };
+
+            await _usersCollection.Indexes.CreateOneAsync(
+                new CreateIndexModel<UserDto>(indexKeysDefinition, indexOptions));
         }
         public async Task<UserDto> GetByIdAsync(Guid id)
         {
