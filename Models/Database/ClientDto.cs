@@ -3,14 +3,8 @@ using MongoDB.Bson;
 
 namespace TestCase.Models.Database
 {
-    public class ClientDto
+    public class ClientDto: BaseDto
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.String)]
-        public Guid Id { get; set; }
         public string Name { get; set; }
-        public DateTime Created { get; set; }
-
-        public DateTime? Updated { get; set; }
     }
 }

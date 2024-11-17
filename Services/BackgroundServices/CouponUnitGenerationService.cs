@@ -45,7 +45,6 @@ namespace TestCase.Services.BackgroundServices
                         {
                             CouponId = couponId,
                             Status = CouponStatus.Active,
-                            Created = DateTime.UtcNow
                         });
                     }
 

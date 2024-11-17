@@ -3,19 +3,12 @@ using MongoDB.Bson;
 
 namespace TestCase.Models.Database
 {
-    public class MachineDto
+    public class MachineDto : BaseDto
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.String)]
-        public Guid Id { get; set; }
-
         [BsonRepresentation(BsonType.String)]
 
         public Guid ClientId { get; set; }
         public string Name { get; set; }
         public string AccessToken { get; set; }
-        public DateTime Created { get; set; }
-
-        public DateTime? Updated { get; set; }
     }
 }

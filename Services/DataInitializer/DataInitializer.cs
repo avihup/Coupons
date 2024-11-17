@@ -28,10 +28,8 @@ namespace TestCase.Services.DataInitializer
             {
                 var admin = new UserDto
                 {
-                    Id = Guid.NewGuid(),
                     UserName = "systemadmin",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("systemadmin123"),
-                    Created = DateTime.UtcNow
                 };
                 await usersCollection.InsertOneAsync(admin);
             }
@@ -50,18 +48,15 @@ namespace TestCase.Services.DataInitializer
             {
                 Id = Guid.NewGuid(),
                 Name = "Default Client",
-                Created = DateTime.UtcNow
             };
             await clientsCollection.InsertOneAsync(client);
 
             // Create initial user
             var user = new UserDto
             {
-                Id = Guid.NewGuid(),
                 ClientId = client.Id,
                 UserName = "admin",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-                Created = DateTime.UtcNow
             };
             await usersCollection.InsertOneAsync(user);
 
@@ -69,21 +64,17 @@ namespace TestCase.Services.DataInitializer
             // add initial machine
             var machine = new MachineDto
             {
-                Id = Guid.NewGuid(),
                 ClientId = client.Id,
                 Name = "test machine",
                 AccessToken = Guid.NewGuid().ToString(),
-                Created = DateTime.UtcNow
             };
             await machinesCollection.InsertOneAsync(machine);
             // add initial kiosk
             var kiosk = new KioskDto
             {
-                Id = Guid.NewGuid(),
                 ClientId = client.Id,
                 Name = "test kiosk",
                 AccessToken = Guid.NewGuid().ToString(),
-                Created = DateTime.UtcNow
             };
             await kioskCollection.InsertOneAsync(kiosk);
 

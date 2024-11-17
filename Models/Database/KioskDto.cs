@@ -3,12 +3,8 @@ using MongoDB.Bson;
 
 namespace TestCase.Models.Database
 {
-    public class KioskDto
+    public class KioskDto : BaseDto
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.String)]
-        public Guid Id { get; set; }
-
         [BsonRepresentation(BsonType.String)]
 
         public Guid ClientId { get; set; }
@@ -16,8 +12,5 @@ namespace TestCase.Models.Database
         public string AccessToken { get; set; }
 
         public string Name { get; set; }
-        public DateTime Created { get; set; }
-
-        public DateTime? Updated { get; set; }
     }
 }
