@@ -6,6 +6,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
 using System.Text;
+using TestCase.Extensions;
 using TestCase.Interfaces.Auth;
 using TestCase.Interfaces.DataInitializer;
 using TestCase.Interfaces.Repositories;
@@ -78,6 +79,8 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 
 // Register AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+builder.Services.AddRedisCache(builder.Configuration);
 
 // Register repositories
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
