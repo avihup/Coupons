@@ -5,6 +5,7 @@ using TestCase.Exceptions;
 using TestCase.Interfaces.Repositories;
 using TestCase.Interfaces.Services;
 using TestCase.Models.Database;
+using TestCase.Models.Filters;
 using TestCase.Models.ViewModels;
 using TestCase.Services.BackgroundServices;
 
@@ -88,9 +89,9 @@ namespace TestCase.Services
             return _mapper.Map<CouponViewModel>(couponDb);
         }
 
-        public async Task<IEnumerable<CouponViewModel>> GetAllAsync(Guid? clientId)
+        public async Task<IEnumerable<CouponViewModel>> GetAllAsync(Guid? clientId, CouponFilterModel filter = null)
         {
-            var couponsDb = await _couponRepository.GetAllAsync(clientId);
+            var couponsDb = await _couponRepository.GetAllAsync(clientId, filter);
             return _mapper.Map<IEnumerable<CouponViewModel>>(couponsDb);
         }
 

@@ -5,6 +5,7 @@ using System.Net.Mime;
 using TestCase.Exceptions;
 using TestCase.Interfaces.Services;
 using TestCase.Models;
+using TestCase.Models.Filters;
 using TestCase.Models.ViewModels;
 using TestCase.Services;
 
@@ -101,20 +102,33 @@ namespace TestCase.Controllers.v1
         }
 
         /// <summary>
-        /// Retrieves all coupons
+        /// Retrieves all coupons with optional filtering
         /// </summary>
-        /// <returns>List of coupons</returns>
+        /// <param name="filter">Filter parameters</param>
+        /// <returns>List of filtered coupons</returns>
+        /// <response code="200">Returns the filtered list of coupons</response>
+        /// <response code="400">If the filter parameters are invalid</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<CouponViewModel>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<CouponViewModel>>> GetAll()
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+
+        public async Task<ActionResult<IEnumerable<CouponViewModel>>> GetAll([FromQuery] CouponFilterModel filter)
         {
             try
             {
-                _logger.LogInformation("Retrieving all coupons for client. ClientId: {ClientId}",
-                    AppUser.ClientId);
+                filter?.Validate();
 
-                var coupons = await _couponService.GetAllAsync(AppUser.ClientId);
+                _logger.LogInformation("Retrieving filtered coupons for client. ClientId: {ClientId}, Filter: {@Filter}",
+                    AppUser.ClientId, filter);
+
+                var coupons = await _couponService.GetAllAsync(AppUser.ClientId, filter);
                 return Ok(coupons);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Invalid filter parameters");
+                return BadRequest(new ErrorResponse(ex.Message));
             }
             catch (Exception ex)
             {

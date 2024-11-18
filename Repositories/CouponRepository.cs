@@ -2,6 +2,7 @@
 using TestCase.Exceptions;
 using TestCase.Interfaces.Repositories;
 using TestCase.Models.Database;
+using TestCase.Models.Filters;
 
 namespace TestCase.Repositories
 {
@@ -58,12 +59,57 @@ namespace TestCase.Repositories
             return await _couponsCollection.Find(filter).FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<CouponDto>> GetAllAsync(Guid? clientId)
+        public async Task<IEnumerable<CouponDto>> GetAllAsync(Guid? clientId, CouponFilterModel filter = null)
         {
-            var filter = clientId.HasValue
-                ? Builders<CouponDto>.Filter.Eq(c => c.ClientId, clientId.Value)
-                : Builders<CouponDto>.Filter.Empty;
-            return await _couponsCollection.Find(filter).ToListAsync();
+            var builder = Builders<CouponDto>.Filter;
+            var filters = new List<FilterDefinition<CouponDto>>();
+            // Add client filter if provided
+            if (clientId.HasValue)
+            {
+                filters.Add(builder.Eq(x => x.ClientId, clientId.Value));
+            }
+
+            // Add other filters based on the filter model
+            if (filter != null)
+            {
+                if (!string.IsNullOrWhiteSpace(filter.Name))
+                {
+                    filters.Add(builder.Regex(x => x.Name,
+                        new MongoDB.Bson.BsonRegularExpression(filter.Name, "i")));
+                }
+
+                if (filter.MinAmount.HasValue)
+                {
+                    filters.Add(builder.Gte(x => x.Amount, filter.MinAmount.Value));
+                }
+
+                if (filter.MaxAmount.HasValue)
+                {
+                    filters.Add(builder.Lte(x => x.Amount, filter.MaxAmount.Value));
+                }
+
+                if (filter.StartDate.HasValue)
+                {
+                    filters.Add(builder.Gte(x => x.ExpiryDate, filter.StartDate.Value));
+                }
+
+                if (filter.EndDate.HasValue)
+                {
+                    filters.Add(builder.Lte(x => x.ExpiryDate, filter.EndDate.Value));
+                }
+
+                if (filter.Status.HasValue)
+                {
+                    filters.Add(builder.Eq(x => x.Status, filter.Status.Value));
+                }
+
+                if (filter.Type.HasValue)
+                {
+                    filters.Add(builder.Eq(x => x.Type, filter.Type.Value));
+                }
+            }
+            var combinedFilter = filters.Any() ? builder.And(filters) : builder.Empty;
+            return await _couponsCollection.Find(combinedFilter).ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateDefinition<CouponDto> update)
