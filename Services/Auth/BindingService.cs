@@ -32,7 +32,6 @@ namespace TestCase.Services.Auth
         public async Task<BindingResponse> LoginAsync(BindingRequest request)
         {
             var kiosk = await _kiosksRespository.GetByAccessToken(request.AccessToken);
-            ClientDto client;
             string token;
             if (kiosk == null)
             {
@@ -40,29 +39,26 @@ namespace TestCase.Services.Auth
                 if (machine == null)
                     throw new UnauthorizedAccessException("Invalid access token");
 
-                client = await _clientsRepository.GetByIdAsync(machine.ClientId);
 
-                token = GenerateJwtToken(client, machine);
+                token = GenerateJwtToken(machine.Client, machine);
 
                 return new BindingResponse
                 {
                     Token = token,
                     Name = machine.Name,
-                    ClientId = client.Id,
-                    ClientName = client.Name
+                    ClientId = machine.Client.Id,
+                    ClientName = machine.Client.Name
                 };
             }
 
-            client = await _clientsRepository.GetByIdAsync(kiosk.ClientId);
-
-            token = GenerateJwtToken(client, kiosk);
+            token = GenerateJwtToken(kiosk.Client, kiosk);
 
             return new BindingResponse
             {
                 Token = token,
                 Name = kiosk.Name,
-                ClientId = client.Id,
-                ClientName = client.Name
+                ClientId = kiosk.Client.Id,
+                ClientName = kiosk.Client.Name
             };
         }
 

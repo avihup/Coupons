@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using TestCase.Interfaces.Repositories;
 using TestCase.Models.Database;
 
@@ -43,7 +44,25 @@ namespace TestCase.Repositories
 
         public async Task<UserDto> GetUserNameAsync(string userName)
         {
-            return await _usersCollection.Find(c => c.UserName == userName).FirstOrDefaultAsync();
+            // Using aggregation to fetch user with client in single query
+            var pipeline = new[]
+            {
+                new BsonDocument("$match", new BsonDocument("UserName", userName)),
+                new BsonDocument("$lookup", new BsonDocument
+                {
+                    { "from", "clients" },
+                    { "localField", "ClientId" },
+                    { "foreignField", "_id" },
+                    { "as", "Client" }
+                }),
+                new BsonDocument("$unwind", new BsonDocument
+                {
+                    { "path", "$Client" },
+                    { "preserveNullAndEmptyArrays", true }
+                })
+            };
+
+            return await _usersCollection.Aggregate<UserDto>(pipeline).FirstOrDefaultAsync();
         }
 
         public async Task<UserDto> CreateAsync(UserDto user)

@@ -35,16 +35,14 @@ namespace TestCase.Services.Auth
                 throw new UnauthorizedAccessException("Invalid username or password");
             }
 
-            var client = user.ClientId.HasValue ? await _clientsRepository.GetByIdAsync(user.ClientId.Value) : null;
-
-            var token = GenerateJwtToken(user, client);
+            var token = GenerateJwtToken(user, user.Client);
 
             return new LoginResponse
             {
                 Token = token,
                 UserName = user.UserName,
-                ClientId = client?.Id,
-                ClientName = client?.Name
+                ClientId = user.Client?.Id,
+                ClientName = user.Client?.Name
             };
         }
 

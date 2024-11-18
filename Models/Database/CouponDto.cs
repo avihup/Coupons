@@ -9,6 +9,9 @@ namespace TestCase.Models.Database
         [BsonRepresentation(BsonType.String)]
         public Guid ClientId { get; set; }
 
+        [BsonIgnoreIfNull]
+        public ClientDto Client { get; set; }
+
         [Required]
         [MinLength(3)]
         [MaxLength(100)]

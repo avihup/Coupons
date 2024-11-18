@@ -9,5 +9,8 @@ namespace TestCase.Models.Database
         public Guid? ClientId { get; set; }
         public string UserName { get; set; }
         public string PasswordHash { get; set; }
+
+        [BsonIgnoreIfNull]
+        public ClientDto Client { get; set; }
     }
 }

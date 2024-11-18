@@ -12,5 +12,8 @@ namespace TestCase.Models.Database
         public string AccessToken { get; set; }
 
         public string Name { get; set; }
+
+        [BsonIgnoreIfNull]
+        public ClientDto Client { get; set; }
     }
 }

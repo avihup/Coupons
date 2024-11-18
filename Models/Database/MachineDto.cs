@@ -10,5 +10,8 @@ namespace TestCase.Models.Database
         public Guid ClientId { get; set; }
         public string Name { get; set; }
         public string AccessToken { get; set; }
+
+        [BsonIgnoreIfNull]
+        public ClientDto Client { get; set; }
     }
 }
